@@ -4,7 +4,7 @@ import requests
 app = Flask(__name__)
 
 # This is your private backend IP/Port or Internal ALB URL
-BACKEND_API = "http://10.0.3.64:8000/items/"
+BACKEND_API = "http://10.0.3.99:8000/items/"
 
 @app.route('/', methods=['GET'])
 def index():

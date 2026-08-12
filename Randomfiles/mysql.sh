@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS items (
 
 mysql -h sri-rds-1.c3ome6gc6134.ap-south-1.rds.amazonaws.com -u admin -p'DOptpuP!kYtIb]:]4Mjr(eefp7E5'<test.sql
 
-
+git pull origin main
 
 
      server {

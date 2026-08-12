@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Inventory Dashboard</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; padding: 20px; }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1 { color: #333; border-bottom: 2px solid #ff9900; padding-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #ddd; }
+        th { background-color: #fafafa; color: #555; }
+        .low-stock { color: #d9534f; font-weight: bold; }
+        .btn-sell { background-color: #ff9900; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+        .btn-sell:hover { background-color: #e38800; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📦 Live E-Commerce Inventory</h1>
+    <table id="inventoryTable">
+        <thead>
+            <tr>
+                <th>SKU</th>
+                <th>Product Name</th>
+                <th>Price</th>
+                <th>Stock Level</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="inventoryBody">
+            <tr><td colspan="5">Loading inventory from AWS...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // ==========================================
+    // REPLACE THIS WITH YOUR ACTUAL ALB DNS NAME
+    // Example: http://Inventory-ALB-123456789.us-west-2.elb.amazonaws.com
+    // ==========================================
+    const API_URL = 'http://YOUR-ALB-DNS-NAME/api';
+
+    async function loadInventory() {
+        try {
+            const response = await fetch(`${API_URL}/inventory`);
+            const products = await response.json();
+            const tbody = document.getElementById('inventoryBody');
+            tbody.innerHTML = '';
+
+            products.forEach(product => {
+                const stockClass = product.stock_quantity < 20 ? 'low-stock' : '';
+                const row = `<tr>
+                    <td>${product.sku}</td>
+                    <td>${product.product_name}</td>
+                    <td>$${product.price}</td>
+                    <td class="${stockClass}">${product.stock_quantity} units</td>
+                    <td><button class="btn-sell" onclick="processSale(${product.id})">Process Sale (1 unit)</button></td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+        } catch (error) {
+            console.error("Error loading inventory:", error);
+            document.getElementById('inventoryBody').innerHTML = '<tr><td colspan="5" style="color:red;">Error connecting to API.</td></tr>';
+        }
+    }
+
+    async function processSale(productId) {
+        try {
+            const response = await fetch(`${API_URL}/sell`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: productId, quantity_sold: 1 })
+            });
+            
+            if (response.ok) {
+                loadInventory(); // Refresh the table automatically
+            } else {
+                alert('Sale failed. Not enough stock.');
+            }
+        } catch (error) {
+            console.error("Sale error:", error);
+            alert('Failed to connect to API.');
+        }
+    }
+
+    // Load data when the page opens
+    window.onload = loadInventory;
+</script>
+
+</body>
+</html>

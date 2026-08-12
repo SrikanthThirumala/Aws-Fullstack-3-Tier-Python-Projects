@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Record</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; }
+        .form-group { background: #f9f9f9; padding: 30px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .form-row { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        
+        .btn-update { padding: 10px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; width: 100%; margin-bottom: 10px;}
+        .btn-update:hover { background: #218838; }
+        
+        .btn-cancel { display: block; text-align: center; padding: 10px 15px; background: #6c757d; color: white; text-decoration: none; border-radius: 4px; }
+        .btn-cancel:hover { background: #5a6268; }
+    </style>
+</head>
+<body>
+
+    <div class="form-group">
+        <h2>Edit Record #{{ item.id }}</h2>
+        
+        {% if item %}
+        <form action="/edit/{{ item.id }}" method="POST">
+            <div class="form-row">
+                <label>Full Name</label>
+                <!-- value attribute pre-fills the input box -->
+                <input type="text" name="name" value="{{ item.name }}" required>
+            </div>
+            
+            <div class="form-row">
+                <label>Email Address</label>
+                <input type="email" name="email" value="{{ item.email }}" required>
+            </div>
+            
+            <div class="form-row">
+                <label>Country</label>
+                <input type="text" name="country" value="{{ item.country }}" required>
+            </div>
+            
+            <button type="submit" class="btn-update">Save Changes</button>
+            <a href="/" class="btn-cancel">Cancel</a>
+        </form>
+        {% else %}
+            <p>Error: Record not found.</p>
+            <a href="/" class="btn-cancel">Return Home</a>
+        {% endif %}
+    </div>
+
+</body>
+</html>

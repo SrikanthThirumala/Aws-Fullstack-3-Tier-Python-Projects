@@ -1,0 +1,101 @@
+#!/bin/bash
+# 1. Update OS and install Node.js
+dnf update -y
+dnf install -y nodejs npm
+
+# 2. Create application directory
+mkdir -p /var/www/inventory-api
+cd /var/www/inventory-api
+
+# 3. Create package.json (Notice we added the aws-sdk/rds-signer)
+cat << 'EOF' > package.json
+{
+  "name": "inventory-api",
+  "version": "1.0.0",
+  "main": "server.js",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "mysql2": "^3.6.0",
+    "@aws-sdk/rds-signer": "^3.0.0"
+  }
+}
+EOF
+
+# 4. Create server.js (Now uses IAM Auth, SSL, and Dynamic Token Refresh)
+cat << 'EOF' > server.js
+const express = require('express');
+const mysql = require('mysql2/promise');
+const cors = require('cors');
+const { Signer } = require("@aws-sdk/rds-signer");
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// Configure the IAM Signer
+const signer = new Signer({
+    hostname: process.env.PROXY_ENDPOINT,
+    port: 3306,
+    region: process.env.AWS_REGION,
+    username: process.env.DB_USER
+});
+
+// Configure the database pool with dynamic IAM token generation
+const pool = mysql.createPool({
+    host: process.env.PROXY_ENDPOINT,
+    user: process.env.DB_USER,
+    database: 'ecommerce_db',
+    waitForConnections: true,
+    connectionLimit: 10,
+    ssl: { rejectUnauthorized: false }, // Required for AWS IAM Auth over TLS
+    authPlugins: {
+        // This ensures a fresh token is generated every time the pool opens a new connection
+        mysql_clear_password: () => () => signer.getAuthToken()
+    }
+});
+
+app.get('/health', (req, res) => res.status(200).send('OK'));
+
+app.get('/api/inventory', async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM products ORDER BY stock_quantity ASC');
+        res.json(rows);
+    } catch (error) {
+        console.error('Database error:', error);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// The missing Sales Endpoint
+app.post('/api/sell', async (req, res) => {
+    const { id, quantity_sold } = req.body;
+    try {
+        const [result] = await pool.query(
+            'UPDATE products SET stock_quantity = stock_quantity - ? WHERE id = ? AND stock_quantity >= ?',
+            [quantity_sold, id, quantity_sold]
+        );
+        if (result.affectedRows === 0) return res.status(400).json({ error: 'Not enough stock or invalid ID' });
+        res.json({ message: 'Sale processed successfully' });
+    } catch (error) {
+        console.error('Transaction failed:', error);
+        res.status(500).json({ error: 'Transaction failed' });
+    }
+});
+
+app.listen(8080, () => console.log('API running on port 8080'));
+EOF
+
+# 5. Install dependencies and PM2
+npm install
+npm install -g pm2
+
+# 6. Set environment variables (REPLACE THESE WITH YOUR DETAILS)
+export PROXY_ENDPOINT="sri-rds-proxy.proxy-c3w0kiqigh9k.us-west-2.rds.amazonaws.com"
+export DB_USER="db_iam_user"
+export AWS_REGION="us-west-2" 
+
+# 7. Start the application injecting the variables
+PM2_HOME=/root/.pm2 PROXY_ENDPOINT=$PROXY_ENDPOINT DB_USER=$DB_USER AWS_REGION=$AWS_REGION pm2 start server.js --name "inventory-api"
+pm2 startup systemd -u root --hp /root
+pm2 save

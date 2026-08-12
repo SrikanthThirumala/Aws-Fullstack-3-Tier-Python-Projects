@@ -10,7 +10,7 @@ app = Flask(__name__)
 # 1. Retrieve Credentials from AWS Secrets Manager
 # ---------------------------------------------------------
 def get_db_credentials():
-    secret_name = "rds!db-bad200e9-b73d-4c30-bc95-a1677efbb16a"
+    secret_name = "rds!db-2dbaca7e-16ce-4aed-a353-0056b237bb52"
     region_name = "ap-south-1"
 
     # Boto3 uses the IAM Role attached to the EC2 instance

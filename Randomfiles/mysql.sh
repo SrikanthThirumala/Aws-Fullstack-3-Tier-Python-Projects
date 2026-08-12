@@ -162,8 +162,8 @@ def lambda_handler(event, context):
     client = boto3.client('logs', region_name='ap-south-1')
     
     # Configuration
-    log_group_name = "My-Flask-Backend-Logs"
-    s3_bucket_name = "YOUR-BUCKET-NAME"  # Replace with your S3 bucket name
+    log_group_name = "My-Backend-api-Logs"
+    s3_bucket_name = "srikanth-backend-api-logs"  # Replace with your S3 bucket name
     
     # 1. Set the timezone to India Standard Time (IST)
     ist_tz = ZoneInfo("Asia/Kolkata")

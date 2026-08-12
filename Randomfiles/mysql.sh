@@ -97,8 +97,113 @@ git pull origin main
 
 
 
+==============================
+
+sudo vi /opt/aws/amazon-cloudwatch-agent/bin/config.json
 
 
+{
+  "agent": {
+    "run_as_user": "root"
+  },
+  "logs": {
+    "logs_collected": {
+      "files": {
+        "collect_list": [
+          {
+            "file_path": "/root/.pm2/logs/*-out.log",
+            "log_group_name": "My-Backend-api-Logs",
+            "log_stream_name": "{instance_id}-Standard-Output"
+          },
+          {
+            "file_path": "/root/.pm2/logs/*-error.log",
+            "log_group_name": "My-Backend-api-Logs",
+            "log_stream_name": "{instance_id}-Errors"
+          }
+        ]
+      }
+    }
+  }
+}
+
+===========================================
+
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "logs.ap-south-1.amazonaws.com"
+            },
+            "Action": "s3:GetBucketAcl",
+            "Resource": "arn:aws:s3:::srikanth-backend-api-logs"
+        },
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "logs.ap-south-1.amazonaws.com"
+            },
+            "Action": [
+                "s3:PutObject",
+                "s3:GetObject"
+            ],
+            "Resource": "arn:aws:s3:::srikanth-backend-api-logs/*"
+        }
+    ]
+}
+
+=================================
+import boto3
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
+def lambda_handler(event, context):
+    client = boto3.client('logs', region_name='ap-south-1')
+    
+    # Configuration
+    log_group_name = "My-Flask-Backend-Logs"
+    s3_bucket_name = "YOUR-BUCKET-NAME"  # Replace with your S3 bucket name
+    
+    # 1. Set the timezone to India Standard Time (IST)
+    ist_tz = ZoneInfo("Asia/Kolkata")
+    
+    # 2. Get current time explicitly localized to IST
+    now_ist = datetime.now(ist_tz)
+    
+    # 3. Calculate timestamps for the API 
+    # (The .timestamp() method automatically converts the IST time into 
+    # absolute Unix epoch milliseconds, which AWS requires)
+    end_time = int(now_ist.timestamp() * 1000)
+    start_time = int((now_ist - timedelta(days=1)).timestamp() * 1000)
+    
+    # 4. S3 Prefix organized by date 
+    # (Because we used IST, this string will now reflect the correct Indian calendar date)
+    date_prefix = now_ist.strftime('%Y-%m-%d')
+    destination_prefix = f"ec2-logs/{date_prefix}"
+    
+    try:
+        response = client.create_export_task(
+            logGroupName=log_group_name,
+            fromTime=start_time,
+            to=end_time,
+            destination=s3_bucket_name,
+            destinationPrefix=destination_prefix
+        )
+        
+        print(f"Export Task Created. Task ID: {response['taskId']}")
+        print(f"Target S3 Prefix: {destination_prefix}")
+        
+        return {
+            'statusCode': 200,
+            'body': f"Successfully initiated export task: {response['taskId']}"
+        }
+        
+    except Exception as e:
+        print(f"Error creating export task: {str(e)}")
+        raise e
+
+ ============================================================================       
 
     Generate a  cloud architecture with the following 
 I have vpc with cidr range 10.0.0.0/24 with 2 public subnets one in us-west2a and other in 2b  and 4 private subnets 2 private subnets have NAT attached one in 2a and other in 2b and on the first private subnet 2 private servers  created and are used for frontend and backend  each in different subnet but same 2a zone ,remaining 2 private subnets which are isolateed from internet are used for subnet grp for rds instance ,created a role for ec2 to assume role that includes ssm management instance core for using SSM to login private server from console and secret read/write for ec2 to fetch secrets of rds instance for logginfg into database from ec2 app.py, on backend server installed mysql client and created a testsridb with the table called items with fields id (auto incrment)name email country and after that created requirements.txt file with Flask,boto3,pymysql ,nodejs and installed python  pip ,to run requirements.txt and install depedencies and nodejs pm2 for running backend python file ,

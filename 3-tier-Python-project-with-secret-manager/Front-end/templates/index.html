@@ -3,21 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RDS User Management</title>
+    <title>RDS User Management - Secure</title>
     <!-- Bootstrap 5 CDN for quick, clean styling -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome CDN for security icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-light">
 
 <div class="container mt-5">
-    <h2 class="mb-4 text-center">Accesing project page using HTTPS</h2>
+    
+    <!-- SSL / HTTPS Security Banner -->
+    <div class="alert alert-success d-flex align-items-center mb-4 shadow-sm" role="alert">
+        <i class="fa-solid fa-shield-halved fa-2x me-3"></i>
+        <div>
+            <strong>Secure Connection Established</strong><br>
+            This page is accessed via a secure HTTPS connection. All data transmitted is encrypted and protected by a valid SSL certificate.
+        </div>
+    </div>
+
+    <h2 class="mb-4 text-center text-dark">
+        <i class="fa-solid fa-lock text-success me-2"></i>Secure RDS User Management
+    </h2>
     
     <div class="row">
         <!-- Form Section -->
         <div class="col-md-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0" id="formTitle">Add New Item</h5>
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0" id="formTitle"><i class="fa-solid fa-user-plus me-2"></i>Add New Item</h5>
                 </div>
                 <div class="card-body">
                     <!-- Form now points to the Python /save route -->
@@ -38,7 +52,9 @@
                             <input type="text" class="form-control" name="country" id="country" required>
                         </div>
                         
-                        <button type="submit" class="btn btn-success w-100" id="saveBtn">Save Record</button>
+                        <button type="submit" class="btn btn-success w-100" id="saveBtn">
+                            <i class="fa-solid fa-cloud-arrow-up me-2"></i>Save Record
+                        </button>
                         <button type="button" class="btn btn-secondary w-100 mt-2 d-none" id="cancelBtn" onclick="resetForm()">Cancel</button>
                     </form>
                 </div>
@@ -47,9 +63,9 @@
 
         <!-- Table Section -->
         <div class="col-md-8">
-            <div class="card shadow-sm">
+            <div class="card shadow-sm border-0">
                 <div class="card-body">
-                    <table class="table table-hover">
+                    <table class="table table-hover align-middle">
                         <thead class="table-light">
                             <tr>
                                 <th>ID</th>
@@ -68,23 +84,26 @@
                                 <td>{{ item.email }}</td>
                                 <td>{{ item.country }}</td>
                                 <td>
-                                    <!-- Edit Button (Uses tiny JS function below to populate form) -->
+                                    <!-- Edit Button -->
                                     <button class="btn btn-sm btn-outline-primary" 
                                             onclick="editItem({{ item.id }}, '{{ item.name }}', '{{ item.email }}', '{{ item.country }}')">
-                                        Edit
+                                        <i class="fa-solid fa-pen-to-square"></i> Edit
                                     </button>
                                     
-                                    <!-- Delete Button (Wrapped in a form to trigger Python POST route) -->
+                                    <!-- Delete Button -->
                                     <form action="/delete/{{ item.id }}" method="POST" class="d-inline">
                                         <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this record?')">
-                                            Delete
+                                            <i class="fa-solid fa-trash"></i> Delete
                                         </button>
                                     </form>
                                 </td>
                             </tr>
                             {% else %}
                             <tr>
-                                <td colspan="5" class="text-center">No records found.</td>
+                                <td colspan="5" class="text-center text-muted py-4">
+                                    <i class="fa-solid fa-folder-open fa-2x mb-2 d-block"></i>
+                                    No records found.
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -103,8 +122,8 @@
         document.getElementById('email').value = email;
         document.getElementById('country').value = country;
         
-        document.getElementById('formTitle').innerText = "Edit Item";
-        document.getElementById('saveBtn').innerText = "Update Record";
+        document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-pen me-2"></i>Edit Item';
+        document.getElementById('saveBtn').innerHTML = '<i class="fa-solid fa-arrows-rotate me-2"></i>Update Record';
         document.getElementById('saveBtn').classList.replace('btn-success', 'btn-primary');
         document.getElementById('cancelBtn').classList.remove('d-none');
     }
@@ -114,8 +133,8 @@
         document.getElementById('itemForm').reset();
         document.getElementById('itemId').value = '';
         
-        document.getElementById('formTitle').innerText = "Add New Item";
-        document.getElementById('saveBtn').innerText = "Save Record";
+        document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-user-plus me-2"></i>Add New Item';
+        document.getElementById('saveBtn').innerHTML = '<i class="fa-solid fa-cloud-arrow-up me-2"></i>Save Record';
         document.getElementById('saveBtn').classList.replace('btn-primary', 'btn-success');
         document.getElementById('cancelBtn').classList.add('d-none');
     }

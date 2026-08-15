@@ -1,6 +1,21 @@
-mysql -h sri-rds.cvmq02608h73.us-west-2.rds.amazonaws.com -u admin -p'7y[Zl3uAk]tW~f]Wu?q38UMS~A:N'<test.sql
+mysql -h sri-netf-rds.c3kc0282gen0.us-west-2.rds.amazonaws.com -u admin -p'h$*[HfO>G1dZx7GU[|fnNfZ36seO'<test.sql
+
+infile -- >  rds!db-146a62f0-5b44-4baa-b67c-4d5eb94ab11d
+replace with -->rds!db-59ded51a-3fc0-497b-ae8e-d60d372c4734
+
+sed -i 's/old_text/new_text/g' filename.txt
 
 
+infile  sri-rds.cvmq02608h73.us-west-2.rds.amazonaws.com
+replace with sri-netf-rds.c3kc0282gen0.us-west-2.rds.amazonaws.com
+
+sed -i 's/sri-rds-main.c10c4oay0c39.us-west-2.rds.amazonaws.com/sri-netf-rds.c3kc0282gen0.us-west-2.rds.amazonaws.com'  /root/Aws-Fullstack-3-Tier-Python-Projects/3-tier-Python-project-with-secret-manager/Back-end-api/main.py
+
+sed -i 's/rds!db-146a62f0-5b44-4baa-b67c-4d5eb94ab11d/rds!db-59ded51a-3fc0-497b-ae8e-d60d372c4734'  /root/Aws-Fullstack-3-Tier-Python-Projects/3-tier-Python-project-with-secret-manager/Back-end-api/main.py
+
+
+pm2 start /root/Aws-Fullstack-3-Tier-Python-Projects/3-tier-Python-project-with-secret-manager/Back-end-api/main.py --interpreter python3 --name "Flash-Backend"
+pm2 start /root/Aws-Fullstack-3-Tier-Python-Projects/3-tier-Python-project-with-secret-manager/Front-end/app.py --interpreter python3 --name "Flash-Frontend"
 test.sql 
 Create database testsridb;
 

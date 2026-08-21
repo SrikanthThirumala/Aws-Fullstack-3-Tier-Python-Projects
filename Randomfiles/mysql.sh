@@ -14,8 +14,8 @@ sed -i 's/sri-rds-main.c10c4oay0c39.us-west-2.rds.amazonaws.com/sri-rds-1.c3ome6
 sed -i 's/rds!db-146a62f0-5b44-4baa-b67c-4d5eb94ab11d/rds!db-08290245-4059-4049-95f0-754994a41d17/g'  /root/Aws-Fullstack-3-Tier-Python-Projects/3-tier-Python-project-with-secret-manager/Back-end-api/main.py
 
 
-pm2 start /root/Aws-Fullstack-3-Tier-Python-Projects/3-tier-Python-project-with-secret-manager/Back-end-api/main.py --interpreter python3 --name "Flash-Backend"
-pm2 start /root/Aws-Fullstack-3-Tier-Python-Projects/3-tier-Python-project-with-secret-manager/Front-end/app.py --interpreter python3 --name "Flash-Frontend"
+pm2 start /root/Aws-Fullstack-3-Tier-Python-Projects/3-tier-Python-project-with-secret-manager/Back-end-api/main.py --interpreter python3 --name "Flash-Backend" --log /var/log/sri-app-logs/backend-api.log
+pm2 start /root/Aws-Fullstack-3-Tier-Python-Projects/3-tier-Python-project-with-secret-manager/Front-end/app.py --interpreter python3 --name "Flash-Frontend" --log /var/log/sri-app-logs/frontend.log
 test.sql 
 Create database testsridb;
 
